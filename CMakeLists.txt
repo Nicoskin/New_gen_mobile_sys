@@ -3,34 +3,38 @@ cmake_minimum_required(VERSION 3.10)
 # Установите имя проекта
 project(Client_Server)
 
+set(CMAKE_C_STANDARD 99)
+
+# Найти библиотеки pcap
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PCAP REQUIRED libpcap)
+
+pkg_check_modules(ZMQ REQUIRED libzmq)
+pkg_check_modules(CZMQ REQUIRED libczmq)
+
+# Найти библиотеки для ZeroMQ и CZMQ
+#find_package(ZMQ REQUIRED)
+#find_package(CZMQ REQUIRED)
+
 # Создайте исполняемые файлы для сервера и клиента
-add_executable(main src/main.c)
+add_executable(server test/server/server.c)  
+add_executable(client test/client/client.c)  
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/test)
-
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/test)
 
 # Свяжите библиотеки с исполняемыми файлами
-target_link_libraries(server ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES})
-target_link_libraries(client ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES})
+target_link_libraries(server ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES} ${PCAP_LIBRARIES})
+target_link_libraries(client ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES} ${PCAP_LIBRARIES})
 
 # Включите директории заголовков
-target_include_directories(server PRIVATE 
+target_include_directories(server PUBLIC  
     ${ZMQ_INCLUDE_DIRS}
     ${CZMQ_INCLUDE_DIRS}
+    ${PCAP_INCLUDE_DIRS}
 )
 
-target_include_directories(client PRIVATE 
+target_include_directories(client PUBLIC  
     ${ZMQ_INCLUDE_DIRS}
     ${CZMQ_INCLUDE_DIRS}
-)
-
-# Установите стандарт C++
-set_target_properties(server PROPERTIES
-    CXX_STANDARD 11  
-    CXX_STANDARD_REQUIRED ON
-)
-
-set_target_properties(client PROPERTIES
-    CXX_STANDARD 11  
-    CXX_STANDARD_REQUIRED ON
+    ${PCAP_INCLUDE_DIRS}
 )
